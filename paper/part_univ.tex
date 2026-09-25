@@ -1,0 +1,115 @@
+\subsection{Universal games with a bounded number of moves}\label{sec:univ}
+
+The General Layout Lemma produces a game whose number of moves grows with the circuit.  To make the
+number of moves \emph{independent of the input} we use a single fixed circuit that enumerates all
+inputs by itself.  The only thing that changes from instance to instance is the length of the delay
+lines, i.e.\ the numerical value of a few moves.
+
+\begin{definition}[Cellular automata]\label{def:ca}
+A \emph{$b$-bit cellular automaton} $F=(f,\iota,\beta)$ consists of a local rule
+$f:Q^3\to Q$ on $Q=\{0,1\}^b$, an initialisation map $\iota:\{0,1\}^3\to Q$ and a boundary state
+$\beta\in Q$.  For a ring length $L\ge1$, a number $X\ge0$ and $\Lambda\le L$, the run
+$\Run_F(L,\Lambda,X,T,i)\in Q$ $(T\ge0,\ 0\le i<L)$ is defined by
+\[\Run_F(L,\Lambda,X,0,i)=\iota\bigl(v_i,[i=0],[i=L-1]\bigr),\qquad v_i=\begin{cases}\mathrm{bit}_i(X)&i<\Lambda\\0&i\ge\Lambda\end{cases}\]
+and $\Run_F(L,\Lambda,X,T+1,i)=f(c_T(i-1),c_T(i),c_T(i+1))$, where $c_T(i)=\Run_F(L,\Lambda,X,T,i)$ and
+$c_T(-1)=c_T(L)=\beta$ (null boundary).
+\end{definition}
+
+The initialisation may depend on whether a cell is the first or the last one; this is how a
+Turing-machine simulation places its head and end markers.
+
+\begin{theorem}[Universality with a bounded number of moves]\label{thm:univ}
+Let $F$ be a $b$-bit cellular automaton.  There are $B\ge1$, residues $\rho_0,\dots,\rho_{b-1}$ and a
+finite list of taps $(a_t,a'_t,c_t,\delta_t)$ $(t=1,\dots,c)$, with $a_t,a'_t\in\{0,1\}$, $c_t\in\mathbb{Z}$,
+$0\le\delta_t<B$, such that the following holds.  For all $L_2\ge2$ and all multiples $L_1$ of $L_2$ let
+\[S_{L_1,L_2}=\{(a_tL_1+a'_tL_2+c_t)B+\delta_t:\ 1\le t\le c\}.\]
+Then $|S_{L_1,L_2}|\le c$, $\max S_{L_1,L_2}<(L_1+L_2+2)B$, and for all $j\ge0$, $0\le T<2^{L_2}$,
+$0\le i<L_1$ and $q<b$:
+\[
+\bigl((j\,2^{L_2}+T)L_1+i\bigr)B+\rho_q\in\cP_{S_{L_1,L_2}}\iff
+\Run_F\bigl(L_1,L_2,\,(j+1)\bmod 2^{L_2},\,T,\,i\bigr)_q=1 .
+\]
+In particular, for $L_1=L_2=L$ the one-parameter family $S_L=S_{L,L}$ runs $F$ on the ring of length
+$L$ from all initial configurations $X=1,2,\dots,2^L-1,0,1,\dots$ in turn, each for $2^L$ steps.
+\end{theorem}
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lll}
+\toprule
+group & wires (NOR of the listed inputs; $[-d]$ = delay $d$ blocks) & value\\
+\midrule
+framing & $\mathrm{boot}=\NOR(\textsc{clk}[-1])$; $\mathrm{nm}_1=\NOR(\mathrm{boot},\mathrm{mk}_1[-L_1])$;
+$\mathrm{mk}_1=\NOR(\mathrm{nm}_1)$ & $\mathrm{mk}_1=[i=0]$\\
+ & $\mathrm{nlc}_1=\NOR(\mathrm{mk}_1[-(L_1-1)])$, $\mathrm{lc}_1=\NOR(\mathrm{nlc}_1)$ & $\mathrm{lc}_1=[i=L_1-1]$\\
+ & $\mathrm{nm}_2,\mathrm{mk}_2,\mathrm{nlc}_2$ likewise with $L_2$ & $\mathrm{mk}_2=[i'=0]$\\
+ & $\mathrm{fwh}=\NOR(\mathrm{mk}_2,\mathrm{nfw}[-1])$, $\mathrm{nfw}=\NOR(\mathrm{mk}_1,\mathrm{fwh})$ & $\mathrm{nfw}=[i\ge L_2]$\\
+timer & counter of Section~\ref{sec:counter} on the $L_2$-ring, carry-in $\mathrm{mk}_1$, & $u_T=\mathrm{bit}_{i'}(t+1)$\\
+ & \quad carry not propagated across $\mathrm{mk}_2$ (7 wires) & \\
+run start & overflow of the timer $\Rightarrow$ $\mathrm{rs}=1$ during the next tape round (8 wires) & $\mathrm{rs}=[T=0]$\\
+input & counter on the $L_2$-ring, $+1$ at the start of each run (8 wires); $v=\NOR(\mathrm{nfw},\neg u_X)$ & $v=v_i$ of $X_j$\\
+cells & literals $s_q[-L_1]$, $s_q[-(L_1\pm1)]$ masked by $\mathrm{mk}_1,\mathrm{lc}_1$ (boundary $\beta$); & \\
+ & one NOR per true row of $f$ (minterm); $\mathrm{nF}_q=\NOR(\text{minterms with } f_q=1)$; & \\
+ & $s_q=(\neg\mathrm{rs}\wedge f_q(\dots))\vee(\mathrm{rs}\wedge\iota_q(v,\mathrm{mk}_1,\mathrm{lc}_1))$ & $s_q=\Run_F(\dots)_q$\\
+\bottomrule
+\end{tabular}
+\caption{The universal enumerating circuit $U_F$.  Block $\tau=tL_1+i=u L_2+i'$ is cell $i$ of tape
+round $t=j2^{L_2}+T$.  For $b=1$ the circuit has $57$--$59$ wires.}
+\label{tab:univ}
+\end{table}
+
+\begin{proof}
+We build a circuit $U_F$ (Table~\ref{tab:univ}; the complete list of wires is in
+\texttt{subgame/univ2.py}) whose delays are $0$, $1$, $L_2-1$, $L_2$, $L_1-1$, $L_1$, $L_1+1$, and apply
+the General Layout Lemma, whose proof uses only residues and therefore allows any delays (a delay
+$d$ becomes a move $dB+\delta$, or $(d-1)B+(B+\delta)$ for a backward edge).  Since the circuit does not
+depend on $L_1,L_2$, neither does the list of taps.  Write $\tau=tL_1+i=uL_2+i'$ and
+$t=j2^{L_2}+T$.  The wires are:
+
+\emph{Framing.}  As in Lemma~\ref{lem:closed}, $\mathrm{mk}_1(\tau)=[i=0]$ and
+$\mathrm{mk}_2(\tau)=[i'=0]$; reading $\mathrm{mk}_1$ with delay $L_1-1$ gives $\mathrm{lc}_1(\tau)=[i=L_1-1]$, and
+similarly for $L_2$.  The latch $\mathrm{fw}=\mathrm{mk}_1\vee(\neg\mathrm{mk}_2\wedge\mathrm{fw}[-1])$ equals
+$[i<L_2]$ (the first $L_2$-word of each tape round), since $L_2\mid L_1$.
+
+\emph{Timer.}  A bit-serial counter on the $L_2$-ring whose carry-in is $\mathrm{mk}_1$ and whose
+carry is cut at every $\mathrm{mk}_2$: it is incremented once per tape round, during the first
+$L_2$-word, and copied unchanged in the other words.  As in Lemma~\ref{lem:closed} its bit in block
+$\tau$ is $\mathrm{bit}_{i'}\bigl((t+1)\bmod 2^{L_2}\bigr)$, and its carry out of the last bit of the first word of
+round $t$ is $[t\equiv-1\pmod{2^{L_2}}]$.
+
+\emph{Run start.}  This overflow is held in a latch until the next $\mathrm{mk}_1$, where it (or
+$\mathrm{boot}$) starts a latch $\mathrm{rs}=\mathrm{rsinj}\vee(\neg\mathrm{mk}_1\wedge\mathrm{rs}[-1])$;
+hence $\mathrm{rs}(\tau)=[T=0]$ and runs are the tape rounds $[j2^{L_2},(j+1)2^{L_2})$.
+
+\emph{Input counter.}  A second counter on the $L_2$-ring, with carry-in $\mathrm{rsinj}$, is
+incremented once per run, so during run $j$ its bit in block $\tau$ is $\mathrm{bit}_{i'}(X_j)$ with
+$X_j=(j+1)\bmod 2^{L_2}$, and $v=\mathrm{fw}\wedge u_X$ equals $v_i$ of Definition~\ref{def:ca}.
+
+\emph{Cells.}  Let $s_q(\tau)$ denote the intended value $\Run_F(L_1,L_2,X_j,T,i)_q$.  For $T\ge1$ the
+blocks $\tau-L_1-1,\tau-L_1,\tau-L_1+1$ are cells $i-1,i,i+1$ of round $t-1$, i.e.\ time $T-1$ of the same
+run; at $i=0$ (resp.\ $i=L_1-1$) the left (right) literal is replaced by $\beta$ using $\mathrm{mk}_1$
+($\mathrm{lc}_1$).  A minterm wire is the NOR of the complemented literals, hence is $1$ exactly for its row
+of $f$; $\mathrm{nF}_q=\neg f_q(\text{neighbours})$; and the final two NOR levels compute
+$s_q=(\neg\mathrm{rs}\wedge f_q)\vee(\mathrm{rs}\wedge\iota_q(v,\mathrm{mk}_1,\mathrm{lc}_1))$.  When
+$T=0$ the rule output is ignored, so reads from the previous run (or from negative blocks) do not
+matter.  By induction on $T$ the intended values satisfy all NOR equations, and by uniqueness they are
+the solution.  The General Layout Lemma then turns the circuit into the game, with
+$\rho_q=13y_{s_q}$.
+\end{proof}
+
+\paragraph{Validation.}  We implemented $U_F$ and checked the closed forms by logic simulation
+against a direct simulation of $F$, for all $256$ elementary rules and for random $2$-bit rules,
+with random $\iota$ and $\beta$, both for $L_1=L_2\in\{3,4,5\}$ and for $L_1=mL_2$ with $L_2\le4$,
+$m\le3$: there was no mismatch.  We also built the
+actual subtraction games and simulated them: for rule $110$ on $L=4$ cells ($123\,181$ moves, $B=124\,917$)
+all $2.4\times10^7$ positions of the first three runs agree with the circuit, and for three
+two-ring instances ($L_2=3$, $L_1=6$, about $2.6\times10^5$ moves) all positions of four runs agree with
+the cellular automaton.
+
+\begin{remark}
+The number of moves $c$ is dominated by the covering moves of the General Layout Lemma (about one per
+zero residue, i.e.\ about $B$), so it is large; it is nevertheless a constant, independent of $L_1$,
+$L_2$ and of the initial configuration.  For the counter of Section~\ref{sec:counter} exact optimisation
+reduced the covering from hundreds of moves to $24$; we have not attempted this for $U_F$.
+\end{remark}
+

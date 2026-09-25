@@ -1,0 +1,87 @@
+\section{Complexity}\label{sec:complexity}
+
+\begin{theorem}[PSPACE-completeness with a bounded number of moves]\label{thm:pspace}
+The problem
+\begin{center}
+\textsc{SubGame}: given a finite set $S\subset\N_{>0}$ in unary and $n\in\N$ in binary, is $n$ a
+P-position of the subtraction game $S$?
+\end{center}
+is PSPACE-complete.  There is a constant $c$ such that it remains PSPACE-complete when restricted to
+$|S|\le c$; in fact there is an explicit family $(S_L)_{L\ge3}$ with $|S_L|\le c$ and $\max S_L=O(L)$
+such that $\{(1^L,n): n\in\cP_{S_L}\}$ is PSPACE-complete.
+\end{theorem}
+
+\begin{proof}
+\emph{Membership.}  Compute $w(0),w(1),\dots,w(n)$ keeping only the last $\max S$ values and a
+binary counter: space $O(\max S+\log n)$.
+
+\emph{Hardness.}  Let $A$ be a PSPACE-complete language and $M$ a deterministic single-tape machine
+deciding it in linear space and time $2^{O(|x|)}$.  Consider the padded language
+$A'=\{x10^r: x\in A,\ r\ge0\}$, which is PSPACE-complete as well, and a deterministic machine $M'$
+that on an input $y\in\{0,1\}^L$ first locates the last $1$ and then runs $M$ on the prefix before it,
+and halts in an absorbing accepting or rejecting state.  It recognises the first and last cell by
+marked symbols and never leaves the $L$ cells: choosing $c_1$ large, when the last $1$ of $y$ is at
+position $\ell$ it uses at most $c_1(\ell+1)$ cells and at most $2^{c_1(\ell+1)}$ steps.
+
+Let $F$ be the usual cellular automaton simulating $M'$: a cell holds a tape symbol (with the marks
+``first'' / ``last''), the machine state if the head is on it, and an \emph{accept flag}; the rule
+performs one step of $M'$, and the new flag is the OR of the three old flags and of ``the head is in
+the accepting state''.  Let $\iota(v,\textit{first},\textit{last})$ be the cell holding symbol $v$
+with the corresponding marks, the head in the initial state iff \textit{first}, and flag $0$; let
+$\beta$ be blank.  Encode the states in $b=O(1)$ bits.  Let $(S_L)$ be the one-parameter family of
+Theorem~\ref{thm:univ} for $F$; its taps, and hence $c$, depend only on $M$.
+
+Given $x$, let $y=x1$, $L=c_1(|x|+1)+|x|+4$, $X=\sum_i y_i2^i$ (so $1\le X<2^L$), $j=X-1$, $T=2^L-1$ and
+$n=\bigl((j2^L+T)L\bigr)B+\rho_{\mathrm{flag}}$.  In run $j$ the automaton starts from $y$ padded by
+zeros; $M'$ halts after at most $2^{c_1(|x|+1)}$ steps, and afterwards the flag (if set) spreads one
+cell per step, so it reaches cell $0$ before time $2^{c_1(|x|+1)}+L\le 2^L-1$.  By
+Theorem~\ref{thm:univ}, $n\in\cP_{S_L}$ iff $x\in A$.  The instance $(S_L,n)$ is computable in
+polynomial time: $S_L$ consists of $c$ numbers of size $O(L)$, and $n$ has $O(L)$ bits.
+\end{proof}
+
+\begin{theorem}[Binary move sets]\label{thm:exptime}
+If the move set $S$ is given in binary (and $n$ in binary), deciding whether $n$ is a P-position of
+$S$ is EXPTIME-complete, and it remains EXPTIME-complete when restricted to $|S|\le c$ for a constant
+$c$.  Consequently no algorithm with running time polynomial in the input length decides the outcome
+of subtraction games with $c$ moves written in binary.
+\end{theorem}
+
+\begin{proof}
+\emph{Membership.}  The simulation above uses space $O(\max S+\log n)$ and time $O(n|S|)$, both at
+most exponential in the input length.
+
+\emph{Hardness.}  Let $M$ decide an EXPTIME-complete language in time $2^{p(|x|)}$ (hence space
+$2^{p(|x|)}$) on a one-sided tape; as above let $M'$ run $M$ on the prefix of its input before the last
+$1$, and let $F$ simulate $M'$ with a spreading accept flag.  Use the two-parameter family
+$S_{L_1,L_2}$ of Theorem~\ref{thm:univ} with $L_2=p(|x|)+|x|+4$ and $L_1$ the least multiple of $L_2$
+exceeding $2^{L_2}$: the input $y=x10\cdots0\in\{0,1\}^{L_2}$ is written on the first $L_2$ of the $L_1$
+cells, the machine never reaches the right end of the tape, and it has $2^{L_2}$ steps.  Take
+$X=\mathrm{val}(y)$, $j=X-1$, $T=2^{L_2}-1$ and $n=((j2^{L_2}+T)L_1)B+\rho_{\mathrm{flag}}$.  In binary,
+$S_{L_1,L_2}$ consists of $c$ numbers of $O(L_2)$ bits and $n$ has $O(L_2)$ bits, so the reduction is
+polynomial.  The last statement follows from the time hierarchy theorem
+($\mathrm{P}\subsetneq\mathrm{EXPTIME}$).
+\end{proof}
+
+Thus the complexity of one-heap subtraction games is governed by the size of the largest move, not
+by the number of moves: they are easy for every fixed game, PSPACE-complete for a bounded number of
+moves written in unary, and EXPTIME-complete for a bounded number of moves written in binary.
+
+\begin{corollary}[Periods are hard to compute]\label{cor:perhard}
+Given $S$ in unary and $p$ in binary, deciding whether the least outcome period of $S$ exceeds $p$
+is PSPACE-hard.
+\end{corollary}
+
+\begin{proof}
+Here a single run suffices.  Let $F$ simulate a linear-space machine $M$ deciding a PSPACE-complete
+language, with both halting states absorbing, and encode its states so that the all-zero code
+(blank, no head, flag $0$) is quiescent.  Take the circuit of Theorem~\ref{thm:univ} without the timer
+and the input counter, and instead OR each state bit $q$ with $\mathrm{OR}_{i\in I_q}\mathrm{boot}[-i]$,
+where $I_q$ is the set of cells whose initial state (on input $x$) has bit $q$ equal to $1$; since all
+reads in round $0$ return $0$, this loads the initial configuration, at the cost of $O(|x|)$ extra
+moves.  After $M$ halts the configuration is frozen, so every wire is periodic with period $L$ blocks.
+Add an $L$-bit serial counter as in Section~\ref{sec:counter} whose carry-in is AND-ed with the accept
+flag of the current cell.  If $M$ rejects, the counter never moves and the eventual period divides
+$BL$; if $M$ accepts, the flag reaches every cell, the counter runs and, as in
+Theorem~\ref{thm:period}, the least period is a multiple of $BL2^L$.  Take $p=BL$.
+\end{proof}
+

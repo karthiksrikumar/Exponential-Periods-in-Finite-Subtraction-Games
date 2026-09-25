@@ -1,0 +1,55 @@
+\section{Discussion and open problems}
+
+A subtraction game is a shift register with a single, fixed nonlinear feedback function, and one
+might expect such a rigid object to be computationally weak.  The results above show the opposite:
+with a bounded number of moves it can count to $2^{\Omega(\max S)}$, and it can simulate any
+space-bounded computation.  Periods are long because the game can compute.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{How few moves?}  Our construction needs $\nmoves$ moves; Flammenkamp's data suggest that
+five moves may already give exponential periods.  What is the least $n$ for which periods of
+$n$-move games are not polynomially bounded?  For the fixed wire placement of our design the exact
+solver proves that at least $24$ moves are needed; other circuits or placements may do better.
+\item \textbf{Growth rate.}  Our periods grow like $2^{\max S/377}$, much slower than the empirical
+$2^{0.3\max S}$ of Flammenkamp's records.  Can one prove $2^{c\max S}$ for a larger $c$?  In our
+approach $c=1/B$, so the question becomes how short a block can be.
+\item \textbf{Complexity threshold.}  Two-move games are easy and games with $c$ moves are
+PSPACE-complete.  What is the least number of moves for which \textsc{SubGame} is PSPACE-hard?
+\item \textbf{Preperiods.}  The same technique gives exponentially long preperiods (let the counter
+halt at its first overflow); it would be interesting to understand the joint behaviour of period and
+preperiod for small move sets.
+\end{enumerate}
+
+\begin{remark}[Any number of moves $n\ge\nmoves$]\label{rem:pad}
+If $\delta$ is the residue of a covering move, then from every clock or wire residue a move
+$\equiv\delta\pmod{377}$ lands on a zero residue.  Adding moves $qB+\delta$ therefore never creates a
+move from a P-position to a P-position, and the P-positions are unchanged.  Hence for every
+$n\ge\nmoves$ there are $n$-move games with period $377k2^k$ and largest move $O(k)$.
+\end{remark}
+
+\begin{thebibliography}{9}
+\bibitem{AB} I.~Althöfer and J.~Bültermann, Superlinear period lengths in some subtraction games,
+\emph{Theoret.\ Comput.\ Sci.} 148 (1995) 111--119.
+\bibitem{WW} E.~R.~Berlekamp, J.~H.~Conway and R.~K.~Guy, \emph{Winning Ways for Your Mathematical
+Plays}, A K Peters, 2001--2004.
+\bibitem{Flammenkamp} A.~Flammenkamp, \emph{Lange Perioden in Subtraktions-Spielen}, Dissertation,
+Universität Bielefeld, 1997.
+\bibitem{LS} U.~Larsson and I.~Saha, A brief conversation about subtraction games,
+arXiv:2405.20054 (2024); in \emph{Games of No Chance 6}.
+\bibitem{LM} U.~Larsson and H.~Manabe, Additive subtraction games, arXiv:2603.10414 (2026).
+\bibitem{LW} U.~Larsson and J.~Wästlund, From heaps of matches to the limits of computability,
+\emph{Electron.\ J.\ Combin.} 20 (2013) P41.
+\bibitem{DGPS} K.~Burke, A.~Dailly and N.~Oijid, Complexity and algorithms for Arc-Kayles and
+Non-Disconnecting Arc-Kayles, arXiv:2404.10390 (2024).
+\bibitem{GV} V.~Gurvich and M.~Vyalyi, On computational hardness of multidimensional subtraction
+games, \emph{Algorithms} 14 (2021) 71, arXiv:2001.03962.
+\bibitem{L12} U.~Larsson, Impartial games emulating one-dimensional cellular automata and
+undecidability, arXiv:1201.1039 (2012).
+\bibitem{MP} I.~Miklós and L.~Post, Superpolynomial period lengths of the winning positions in the
+subtraction game, \emph{Int.\ J.\ Game Theory} (2024), arXiv:2312.02426.
+\bibitem{Nowakowski} R.~J.~Nowakowski, Unsolved problems in combinatorial games, in \emph{Games of
+No Chance 5}, MSRI Publ.\ 70 (2019) 125--168.
+\bibitem{Ward} M.~D.~Ward, A conjecture about periods in subtraction games, arXiv:1606.04029.
+\end{thebibliography}
+
+\end{document}

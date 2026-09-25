@@ -1,0 +1,27 @@
+\section{How the design was found}\label{sec:search}
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Exploration.}  A C program computes outcome periods by cycle detection on the
+$m$-bit shift-register state.  Record periods of max-symmetric five-move sets grow roughly like
+$2^{0.33m}$ (confirming Flammenkamp), but along every structured one-parameter family we tried the
+periods were erratic---chaotic dynamics that resist proof.  This motivated \emph{designing} rather
+than \emph{finding} long periods.
+\item \textbf{Layouts.}  Random layouts almost never work: small differences between residues
+collide.  Placing wires on a coarse grid $G\cdot Y$ with $Y$ a Sidon set, and clocks in a few
+residue classes modulo $G$ chosen so that their sums and differences avoid each other, produced the
+first valid design ($B=1157$, $1061$ moves), confirmed by direct simulation for $k\le 8$.
+\item \textbf{Heuristic optimisation.}  Choosing covering taps by greedy set cover and running
+simulated annealing over wire positions, clock sets and $B$ reduced the number of moves
+$1061\to169\to 67\to 56\to 54$.
+\item \textbf{Exact optimisation.}  For fixed wire positions, conditions \ref{c:K}--\ref{c:Z0} are
+a Boolean constraint problem in the clock indicators $c_r$ and tap indicators $t_\delta$:
+``clock sees clock'' is the clause $\neg c_r\vee\neg t_\delta\vee\neg c_{r-\delta}$, a zero residue $r$
+needs $c_r\vee\bigvee_\delta(t_\delta\wedge c_{r-\delta})$, and so on.  Minimising $\sum t_\delta$ with the
+CP-SAT solver (OR-Tools) found designs with $48$ and then $\nmoves$ moves; the solver's lower bound
+for this wire placement is $24$.  The optimum uses many more clocks ($\nclocks$ instead of $17$), so that
+each covering move serves several zero residues.
+\end{enumerate}
+Every candidate was checked by an exact verifier of conditions \ref{c:K}--\ref{c:Z0}, and the final
+design by simulating the game itself: for $k=2,\dots,6$ the simulated P-positions coincide with the
+counter pattern and the least periods are $3016,9048,24128,60320,144768$.
+

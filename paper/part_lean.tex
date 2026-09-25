@@ -1,0 +1,24 @@
+\section{Formal verification in Lean}\label{sec:lean}
+
+The development (Lean 4.33.1, Mathlib) consists of:
+\begin{center}\small
+\begin{tabular}{ll}
+\toprule
+\texttt{Basic.lean} & P-set characterisation, uniqueness, computable \texttt{outcome}\\
+\texttt{Arith.lean} & block arithmetic (Lemma~\ref{lem:arith})\\
+\texttt{Simulation.lean} & designs, conditions \ref{c:K}--\ref{c:Z0}, Theorem~\ref{thm:sim}\\
+\texttt{Bits.lean}, \texttt{Counter.lean} & carry/increment rules, Lemma~\ref{lem:closed}\\
+\texttt{Design.lean} & the concrete design; all finite conditions by \texttt{decide +kernel}\\
+\texttt{Period.lean} & Theorem~\ref{thm:period}\\
+\texttt{Main.lean}, \texttt{Grundy.lean} & Theorem~\ref{thm:main}, Corollary~\ref{cor:guy}, nim-values\\
+\texttt{Tests.lean} & sanity checks ($\{1,2\}$, $\{1,3,4\}$), exact size and largest move\\
+\texttt{Layout.lean} & General Layout Lemma (Lemma~\ref{lem:gll}), \texttt{GLL.simulate}\\
+\bottomrule
+\end{tabular}
+\end{center}
+The game semantics are defined independently of the construction: \texttt{outcome L n} is defined by
+well-founded recursion as ``no legal move leads to a position with \texttt{outcome = true}'', and
+\texttt{grundy L n} as the minimum excludant of the options' values.  The file \texttt{Design.lean} is
+generated from the design found by the search, and the kernel checks conditions
+\ref{c:K}--\ref{c:Z0} for it.  No \texttt{sorry}, \texttt{native\_decide} or additional axioms are used.
+
