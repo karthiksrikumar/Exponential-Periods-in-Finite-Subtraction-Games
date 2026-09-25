@@ -1,0 +1,29 @@
+# build output
+lean/.lake/
+lean/scratch/
+*.log
+*.exe
+*.pdb
+*.bin
+*.o
+__pycache__/
+*.pyc
+paper/*.aux
+paper/*.out
+paper/*.toc
+*.bak
+
+# backups
+subgame/lean_backup_29/
+
+# third-party papers (download them from the original sources)
+explore/*.pdf
+explore/gv.txt
+explore/lw.txt
+explore/manabe.txt
+explore/miklos.txt
+explore/ward.txt
+
+# personal notes
+info.txt
+explore/subtraction_conv.txt
